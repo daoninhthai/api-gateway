@@ -27,6 +27,23 @@ spring:
           predicates:
             - Path=/api/auth/**
 
+  # Redis configuration
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 5000ms
+
+# JWT configuration
+jwt:
+  secret: daoninhthai-secret-key-for-jwt-authentication-2022-must-be-long-enough
+
+# Rate limiting defaults
+gateway:
+  rate-limit:
+    replenish-rate: 10
+    burst-capacity: 20
+    requested-tokens: 1
+
 eureka:
   client:
     service-url:
