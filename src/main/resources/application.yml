@@ -44,6 +44,15 @@ gateway:
     burst-capacity: 20
     requested-tokens: 1
 
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.daoninhthai.gateway: DEBUG
+    com.daoninhthai.gateway.filter: DEBUG
+    org.springframework.cloud.gateway: INFO
+    reactor.netty: INFO
+
 eureka:
   client:
     service-url:
