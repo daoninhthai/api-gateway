@@ -1,5 +1,6 @@
 package com.daoninhthai.gateway.config;
 
+import com.daoninhthai.gateway.filter.ApiVersionFilter;
 import com.daoninhthai.gateway.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -13,6 +14,9 @@ public class RouteConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private ApiVersionFilter apiVersionFilter;
+
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -25,7 +29,29 @@ public class RouteConfig {
                                         .setFallbackUri("forward:/fallback/auth-service")))
                         .uri("lb://auth-service"))
 
-                // User Service - protected with JWT + circuit breaker
+                // Versioned routes - v1
+                .route("user-service-v1", r -> r
+                        .path("/api/v1/users/**")
+                        .filters(f -> f
+                                .filter(apiVersionFilter.apply(new ApiVersionFilter.Config()))
+                                .filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config()))
+                                .circuitBreaker(config -> config
+                                        .setName("user-service-cb")
+                                        .setFallbackUri("forward:/fallback/user-service")))
+                        .uri("lb://user-service"))
+
+                // Versioned routes - v2
+                .route("user-service-v2", r -> r
+                        .path("/api/v2/users/**")
+                        .filters(f -> f
+                                .filter(apiVersionFilter.apply(new ApiVersionFilter.Config()))
+                                .filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config()))
+                                .circuitBreaker(config -> config
+                                        .setName("user-service-cb")
+                                        .setFallbackUri("forward:/fallback/user-service")))
+                        .uri("lb://user-service"))
+
+                // User Service - default (no version prefix)
                 .route("user-service", r -> r
                         .path("/api/users/**")
                         .filters(f -> f
