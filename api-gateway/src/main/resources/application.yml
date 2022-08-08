@@ -44,6 +44,16 @@ gateway:
     burst-capacity: 20
     requested-tokens: 1
 
+# Actuator / Health check configuration
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway
+
 # Logging configuration
 logging:
   level:
