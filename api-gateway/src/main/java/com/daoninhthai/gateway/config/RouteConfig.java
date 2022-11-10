@@ -2,6 +2,7 @@ package com.daoninhthai.gateway.config;
 
 import com.daoninhthai.gateway.filter.ApiVersionFilter;
 import com.daoninhthai.gateway.filter.JwtAuthenticationFilter;
+import com.daoninhthai.gateway.filter.OAuth2AuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -17,6 +18,9 @@ public class RouteConfig {
     @Autowired
     private ApiVersionFilter apiVersionFilter;
 
+    @Autowired
+    private OAuth2AuthenticationFilter oauth2AuthenticationFilter;
+
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -26,6 +30,16 @@ public class RouteConfig {
                         .filters(f -> f
                                 .circuitBreaker(config -> config
                                         .setName("auth-service-cb")
+                                        .setFallbackUri("forward:/fallback/auth-service")))
+                        .uri("lb://auth-service"))
+
+                // OAuth2 protected route - for third-party integrations
+                .route("oauth2-service", r -> r
+                        .path("/api/oauth2/**")
+                        .filters(f -> f
+                                .filter(oauth2AuthenticationFilter.apply(new OAuth2AuthenticationFilter.Config()))
+                                .circuitBreaker(config -> config
+                                        .setName("oauth2-service-cb")
                                         .setFallbackUri("forward:/fallback/auth-service")))
                         .uri("lb://auth-service"))
 
