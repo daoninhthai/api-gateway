@@ -49,10 +49,18 @@ management:
   endpoint:
     health:
       show-details: always
+    prometheus:
+      enabled: true
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,gateway
+        include: health,info,metrics,gateway,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
 
 # Logging configuration
 logging:
